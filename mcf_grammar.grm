@@ -1,0 +1,36 @@
+﻿"Name"     = 'Enter the name of the grammar'
+"Author"   = 'Enter your name'
+"Version"  = 'The version of the grammar and/or language'
+"About"    = 'A short description of the grammar'
+"Start Symbol" = <Lines>
+"Case Sensitive" = True
+
+{WS}           = {Whitespace} - {CR} - {LF}
+Whitespace    = {WS}+
+NewLine       = {CR}{LF} | {CR} | {LF}
+CommentL        = '%' {Printable}*
+
+<nl>     ::= NewLine <nl>          !One or more
+          |  NewLine
+<nl Opt> ::= NewLine <nl Opt>      !Zero or more
+
+Action = [abcdefghijklmnopqrstuvwxyz]+
+Variable = [ABCDEFGHIJKLMNOPQRSTUVWXYZ]
+Proposition = true | false
+           
+<muForm> ::= Proposition
+       | Variable
+       | '(' <muForm> '||' <muForm> ')'
+       | '(' <muForm> '&&' <muForm> ')'
+       | '<' Action '>' <muForm>
+       | '[' Action ']' <muForm>
+       | 'mu' Variable '.' <muForm>
+       | 'nu' Variable '.' <muForm>
+       | 'not' <muForm>
+       
+<Line> ::= CommentL <nl>
+         | <muForm> <nl>
+         | <nl>
+         
+<Lines> ::= <Line><Lines>
+           | 
