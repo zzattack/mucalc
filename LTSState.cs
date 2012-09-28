@@ -35,5 +35,9 @@ namespace ModelChecker {
             }
         }
 
+        public override bool Equals(object obj) {
+            return ((LTSState)obj).Name == Name;
+        }
+
     }
 }

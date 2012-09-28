@@ -10,7 +10,7 @@ namespace ModelChecker {
 
         public Environment Clone() {
             var ret = new Environment();
-            ret.LTS = this.LTS.Clone();
+            ret.LTS = LTS.Clone();
             foreach (var e in Variables)
                 ret.Variables[e.Key] = e.Value;
             return ret;
@@ -22,8 +22,8 @@ namespace ModelChecker {
             return Variables[varName];
         }
 
-        internal void Replace(MuFormula variable, HashSet<LTSState> X) {
-            Variables[((Variable)variable).Name] = X;
+        public void Replace(MuFormula variable, HashSet<LTSState> X) {
+            Variables[((Variable)variable).Name] = new HashSet<LTSState>(X);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace ModelChecker {
         }
 
         public static HashSet<LTSState> GFP(PredicateTransformer tau, Environment env) {
-            var Q = Tuple.Create(env.LTS.States, env);
+            var Q = Tuple.Create(new HashSet<LTSState>(env.LTS.States), env);
             Tuple<HashSet<LTSState>, Environment> QPrime = tau(Q);
 
             while (QPrime.Item1.Count() != Q.Item1.Count()) {

@@ -8,36 +8,7 @@ using ModelChecker;
 class MuCalculusParser {
     public List<MuFormula> formulas = new List<MuFormula>();
     private GOLD.Parser parser = new GOLD.Parser();
-
-
-    private enum SymbolIndex {
-        @Eof = 0,                                  // (EOF)
-        @Error = 1,                                // (Error)
-        @Whitespace = 2,                           // Whitespace
-        @Ampamp = 3,                               // '&&'
-        @Lparen = 4,                               // '('
-        @Rparen = 5,                               // ')'
-        @Dot = 6,                                  // '.'
-        @Lbracket = 7,                             // '['
-        @Rbracket = 8,                             // ']'
-        @Pipepipe = 9,                             // '||'
-        @Lt = 10,                                  // '<'
-        @Gt = 11,                                  // '>'
-        @Action = 12,                              // Action
-        @Commentl = 13,                            // CommentL
-        @Mu = 14,                                  // mu
-        @Newline = 15,                             // NewLine
-        @Not = 16,                                 // not
-        @Nu = 17,                                  // nu
-        @Proposition = 18,                         // Proposition
-        @Variable = 19,                            // Variable
-        @Line = 20,                                // <Line>
-        @Lines = 21,                               // <Lines>
-        @Muform = 22,                              // <muForm>
-        @Nl = 23,                                  // <nl>
-        @Nlopt = 24                                // <nl Opt>
-    }
-
+    
     private enum ProductionIndex {
         @Nl_Newline = 0,                           // <nl> ::= NewLine <nl>
         @Nl_Newline2 = 1,                          // <nl> ::= NewLine
@@ -51,12 +22,14 @@ class MuCalculusParser {
         @Muform_Mu_Variable_Dot = 9,               // <muForm> ::= mu Variable '.' <muForm>
         @Muform_Nu_Variable_Dot = 10,              // <muForm> ::= nu Variable '.' <muForm>
         @Muform_Not = 11,                          // <muForm> ::= not <muForm>
-        @Line_Commentl = 12,                       // <Line> ::= CommentL <nl>
-        @Line = 13,                                // <Line> ::= <muForm> <nl>
-        @Line2 = 14,                               // <Line> ::= <nl>
-        @Lines = 15,                               // <Lines> ::= <Line> <Lines>
-        @Lines2 = 16                               // <Lines> ::= 
+        @Muform_Lparen_Rparen = 12,                // <muForm> ::= '(' <muForm> ')'
+        @Line_Commentl = 13,                       // <Line> ::= CommentL <nl>
+        @Line = 14,                                // <Line> ::= <muForm> <nl>
+        @Line2 = 15,                               // <Line> ::= <nl>
+        @Lines = 16,                               // <Lines> ::= <Line> <Lines>
+        @Lines2 = 17                               // <Lines> ::= 
     }
+
 
     public object program;     //You might derive a specific object
 
@@ -186,6 +159,10 @@ class MuCalculusParser {
                 // <muForm> ::= not <muForm>
                 return new Negation((MuFormula)r[1].Data);
 
+            case ProductionIndex.Muform_Lparen_Rparen:
+                // <muForm> ::= '(' <muForm> ')'
+                return (MuFormula)r[1].Data;
+
             case ProductionIndex.Line_Commentl:
                 // <Line> ::= CommentL <nl>
                 break;
@@ -212,4 +189,4 @@ class MuCalculusParser {
         return result;
     }
 
-}; //MyParser
+};

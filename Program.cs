@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 
 namespace ModelChecker {
@@ -10,26 +11,37 @@ namespace ModelChecker {
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main() {
+        static void Main(string[] args) {
+            string ltsPath = args[0];
+            string formulasPath = args[1];
+
             var parser = new MuCalculusParser();
             parser.Setup();
-            parser.Parse(new StreamReader(@"C:\Users\Frank\Google Drive\TUe\2IW55 - Algorithms for Model Checking\dining\invariantly_inevitably_eat.mcf"));
+            var fileStream = new FileStream(formulasPath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
+            bool parseResult = parser.Parse(new StreamReader(fileStream, Encoding.Default));
+            fileStream.Close();
+            if (!parseResult)
+                Console.WriteLine("Failed to parse!");
 
             Environment env = new Environment();
-            env.LTS = LTS.Parse(@"C:\Users\Frank\Google Drive\tue\2IW55 - Algorithms for Model Checking\dining\dining_2.aut");
+            env.LTS = LTS.Parse(ltsPath);
 
-            foreach (MuFormula f in parser.formulas)
-                OutputResult(f, f.Evaluate(env));
+            foreach (MuFormula f in parser.formulas) {
+                Console.WriteLine("----------------------------------");
+                OutputResult(f, f.Evaluate(env.Clone()));
+            }
 
+            Console.WriteLine();
             Console.ReadKey();
         }
 
         private static void OutputResult(MuFormula f, HashSet<LTSState> hashSet) {
-            Console.WriteLine("Formula {0} holds in: ", f);
-            foreach (var state in hashSet)
-                Console.WriteLine("\t - {0}", state.Name);
+            Console.WriteLine("Formula {0}");
+            Console.Write("\t ND: {0}, AD: {1}, DAD: {2}", f.NestingDepth, f.AlternationDepth, f.DependentAlternationDepth);
             if (hashSet.Count == 0)
-                Console.WriteLine("\t no states");
+                Console.WriteLine("\tHolds in no states");
+            else
+                Console.WriteLine("\tHolds in {0}", string.Join(", ", hashSet));
         }
     }
 }

@@ -16,7 +16,7 @@ namespace ModelChecker {
             // parse aldebran format
             var ret = new LTS();
             StreamReader sr = new StreamReader(file, Encoding.Default);
-            var lineRE = new Regex(@"\((\d+)\s*,\s*""([^\""]+?)""\s*,\s*(\d+)\s*\)");
+            var lineRE = new Regex(@"\((\w+)\s*,\s*""([^\""]+?)""\s*,\s*(\w+)\s*\)");
 
             while (!sr.EndOfStream) {
                 var line = sr.ReadLine();

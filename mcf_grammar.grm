@@ -27,6 +27,7 @@ Proposition = true | false
        | 'mu' Variable '.' <muForm>
        | 'nu' Variable '.' <muForm>
        | 'not' <muForm>
+       | '(' <muForm> ')'
        
 <Line> ::= CommentL <nl>
          | <muForm> <nl>
