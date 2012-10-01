@@ -24,11 +24,11 @@ namespace ModelChecker {
                 Console.WriteLine("Failed to parse!");
 
             Environment env = new Environment();
-            env.LTS = LTS.Parse(ltsPath);
+            LTS lts = LTS.Parse(ltsPath);
 
             foreach (MuFormula f in parser.formulas) {
                 Console.WriteLine("----------------------------------");
-                OutputResult(f, f.Evaluate(env.Clone()));
+                OutputResult(f, f.Evaluate(env.Clone(), lts));
             }
 
             Console.WriteLine();

@@ -4,26 +4,24 @@ using System.Linq;
 using System.Text;
 
 namespace ModelChecker {
-    public class Environment {
-        private Dictionary<string, HashSet<LTSState>> Variables = new Dictionary<string, HashSet<LTSState>>();
-        public LTS LTS;
+	public class Environment : Dictionary<Variable, HashSet<LTSState>> {
 
-        public Environment Clone() {
-            var ret = new Environment();
-            ret.LTS = LTS.Clone();
-            foreach (var e in Variables)
-                ret.Variables[e.Key] = e.Value;
-            return ret;
-        }
+		public Environment Clone() {
+			var ret = new Environment();
+			foreach (var key in this.Keys)
+				ret[key] = this[key];
+			return ret;
+		}
+		public HashSet<LTSState> GetVariable(Variable var) {
+			if (!ContainsKey(var))
+				this[var] = new HashSet<LTSState>();
+			return this[var];
+		}
 
-        public HashSet<LTSState> GetVariable(string varName) {
-            if (!Variables.ContainsKey(varName))
-                Variables[varName] = new HashSet<LTSState>();
-            return Variables[varName];
-        }
-
-        public void Replace(MuFormula variable, HashSet<LTSState> X) {
-            Variables[((Variable)variable).Name] = new HashSet<LTSState>(X);
-        }
-    }
+		/*		public LTS LTS;
+				
+				public void Replace(MuFormula variable, HashSet<LTSState> X) {
+					Variables[((Variable)variable).Name] = new HashSet<LTSState>(X);
+				}*/
+	}
 }

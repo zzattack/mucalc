@@ -4,13 +4,13 @@ using System.Linq;
 
 namespace ModelChecker {
     using PredicateTransformer =
-        Func<Tuple<HashSet<LTSState>, Environment>,
-              Tuple<HashSet<LTSState>, Environment>>;
+        Func<Tuple<HashSet<LTSState>, LTS, Environment>,
+			  Tuple<HashSet<LTSState>, LTS, Environment>>;
 
     public static class FixedPoint {
-        public static HashSet<LTSState> LFP(PredicateTransformer tau, Environment env) {
-            var Q = Tuple.Create(new HashSet<LTSState>(), env);
-            Tuple<HashSet<LTSState>, Environment> QPrime = tau(Q);
+		public static HashSet<LTSState> LFP(PredicateTransformer tau, LTS lts, Environment env) {
+            var Q = Tuple.Create(new HashSet<LTSState>(), lts, env);
+            var QPrime = tau(Q);
 
             while (QPrime.Item1.Count() != Q.Item1.Count()) {
                 Q = QPrime;
@@ -20,9 +20,9 @@ namespace ModelChecker {
             return Q.Item1;
         }
 
-        public static HashSet<LTSState> GFP(PredicateTransformer tau, Environment env) {
-            var Q = Tuple.Create(new HashSet<LTSState>(env.LTS.States), env);
-            Tuple<HashSet<LTSState>, Environment> QPrime = tau(Q);
+        public static HashSet<LTSState> GFP(PredicateTransformer tau, LTS lts, Environment env) {
+            var Q = Tuple.Create(new HashSet<LTSState>(lts.States), lts, env);
+            var QPrime = tau(Q);
 
             while (QPrime.Item1.Count() != Q.Item1.Count()) {
                 Q = QPrime;

@@ -52,7 +52,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="EmersonLei.cs" />
     <Compile Include="Environment.cs" />
     <Compile Include="FixedPoint.cs" />

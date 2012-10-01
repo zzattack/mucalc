@@ -29,10 +29,7 @@ class MuCalculusParser {
         @Lines = 16,                               // <Lines> ::= <Line> <Lines>
         @Lines2 = 17                               // <Lines> ::= 
     }
-
-
-    public object program;     //You might derive a specific object
-
+	
     public void Setup() {
         //This procedure can be called to load the parse tables. The class can
         //read tables using a BinaryReader.
