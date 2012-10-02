@@ -12,13 +12,22 @@ namespace ModelChecker {
 		public abstract int NestingDepth { get; }
 		public abstract int AlternationDepth { get; }
 		public abstract int DependentAlternationDepth { get; }
-		public abstract List<MuFormula> SubFormulas { get; }
-		public MuFormula Parent { get; private set; }
 
-		internal void SetParents(MuFormula parent) {
+		public abstract List<MuFormula> SubFormulas { get; }
+		public List<MuFormula> AllSubFormulas {
+			get {
+				var ret = new List<MuFormula> { this };
+				foreach (var subf in SubFormulas)
+					ret.AddRange(subf.AllSubFormulas);
+				return ret;
+			}
+		}
+
+		public MuFormula Parent { get; private set; }
+		public void SetParents(MuFormula parent) {
 			Parent = parent;
 			foreach (var f in SubFormulas)
-				f.Parent = this;
+				f.SetParents(this);
 		}
 	}
 
@@ -84,7 +93,7 @@ namespace ModelChecker {
 		}
 
 		public bool IsBound(MuFormula subFormula) {
-			// returns whether this variable is bound in the givne subformula
+			// returns whether this variable is bound in the given subformula
 			var parent = Parent;
 			do {
 				if (parent is Mu && ((Mu)parent).Formula.Equals(this)) return true;
@@ -145,13 +154,7 @@ namespace ModelChecker {
 		}
 
 		public override List<MuFormula> SubFormulas {
-			get {
-				var ret = new List<MuFormula> {Left};
-				ret.AddRange(Left.SubFormulas);
-				ret.Add(Right);
-				ret.AddRange(Right.SubFormulas);
-				return ret;
-			}
+			get { return new List<MuFormula> { Left, Right }; }
 		}
 	}
 
@@ -179,25 +182,23 @@ namespace ModelChecker {
 		}
 
 		public override List<MuFormula> SubFormulas {
-			get {
-				var ret = new List<MuFormula> {Left};
-				ret.AddRange(Left.SubFormulas);
-				ret.Add(Right);
-				ret.AddRange(Right.SubFormulas);
-				return ret;
-			}
+			get { return new List<MuFormula> { Left, Right }; }
 		}
 	}
 
 	class Box : MuFormula {
-		public string Action;
+		public RegularFormula RegularFormula;
+		public string Action {
+			get { return ((SingleAction)RegularFormula).Action; }
+		}
 		public MuFormula Formula;
-		public Box(string action, MuFormula formula) {
-			Action = action;
+
+		public Box(RegularFormula regForm, MuFormula formula) {
+			RegularFormula = regForm;
 			Formula = formula;
 		}
 		public override string ToString() {
-			return "[" + Action + "]" + Formula;
+			return "[" + RegularFormula + "]" + Formula;
 		}
 
 		public override int NestingDepth {
@@ -213,23 +214,25 @@ namespace ModelChecker {
 		}
 
 		public override List<MuFormula> SubFormulas {
-			get {
-				var ret = new List<MuFormula> {Formula};
-				ret.AddRange(Formula.SubFormulas);
-				return ret;
-			}
+			get { return new List<MuFormula> { Formula }; }
 		}
 	}
 
-	class Diamond : MuFormula {
-		public string Action;
+	internal class Diamond : MuFormula {
+		public RegularFormula RegularFormula;
+		public string Action {
+			get { return ((SingleAction)RegularFormula).Action; }
+		}
+
 		public MuFormula Formula;
-		public Diamond(string action, MuFormula formula) {
-			Action = action;
+
+		public Diamond(RegularFormula regForm, MuFormula formula) {
+			RegularFormula = regForm;
 			Formula = formula;
 		}
+
 		public override string ToString() {
-			return "<" + Action + ">" + Formula;
+			return "<" + RegularFormula + ">" + Formula;
 		}
 
 		public override int NestingDepth {
@@ -245,11 +248,7 @@ namespace ModelChecker {
 		}
 
 		public override List<MuFormula> SubFormulas {
-			get {
-				var ret = new List<MuFormula> {Formula};
-				ret.AddRange(Formula.SubFormulas);
-				return ret;
-			}
+			get { return new List<MuFormula> { Formula }; }
 		}
 	}
 
@@ -271,27 +270,15 @@ namespace ModelChecker {
 		}
 
 		public override int AlternationDepth {
-			get {
-				int max = SubFormulas.OfType<Nu>().Select(v => v.AlternationDepth).Concat(new[] {0}).Max();
-				return max + 1;
-			}
+			get { return 1 + AllSubFormulas.OfType<Nu>().Select(v => v.AlternationDepth).Concat(new[] { 0 }).Max(); }
 		}
 
 		public override int DependentAlternationDepth {
-			get {
-				int max =
-					(from v in SubFormulas where v is Nu && v.SubFormulas.Contains(Variable) select v.DependentAlternationDepth).Concat
-						(new[] {0}).Max();
-				return max + 1;
-			}
+			get { return 1 + AllSubFormulas.OfType<Nu>().Select(v => v.DependentAlternationDepth).Concat(new[] { 0 }).Max(); }
 		}
 
 		public override List<MuFormula> SubFormulas {
-			get {
-				var ret = new List<MuFormula> {Formula};
-				ret.AddRange(Formula.SubFormulas);
-				return ret;
-			}
+			get { return new List<MuFormula> { Formula }; }
 		}
 
 		public bool IsBound() {
@@ -317,29 +304,19 @@ namespace ModelChecker {
 		}
 
 		public override int AlternationDepth {
-			get {
-				int max = SubFormulas.OfType<Mu>().Select(v => v.AlternationDepth).Concat(new[] {0}).Max();
-				return max + 1;
-			}
+			get { return 1 + AllSubFormulas.OfType<Mu>().Select(v => v.AlternationDepth).Concat(new[] { 0 }).Max(); }
 		}
 
 		public override int DependentAlternationDepth {
-			get {
-				int max = (from v in SubFormulas where v is Mu && v.SubFormulas.Contains(Variable) select v.DependentAlternationDepth).Concat(new[] {0}).Max();
-				return max + 1;
-			}
+			get { return 1 + AllSubFormulas.OfType<Mu>().Select(v => v.DependentAlternationDepth).Concat(new[] { 0 }).Max(); }
 		}
 
 		public override List<MuFormula> SubFormulas {
-			get {
-				var ret = new List<MuFormula> {Formula};
-				ret.AddRange(Formula.SubFormulas);
-				return ret;
-			}
+			get { return new List<MuFormula> { Formula }; }
 		}
 
 		public bool IsBound() {
-			return SubFormulas.OfType<Variable>().Any(var => var.IsBound(this));
+			return AllSubFormulas.OfType<Variable>().Any(var => var.IsBound(this));
 		}
 
 	}

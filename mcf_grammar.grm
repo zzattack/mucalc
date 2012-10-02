@@ -1,8 +1,4 @@
-﻿"Name"     = 'Enter the name of the grammar'
-"Author"   = 'Enter your name'
-"Version"  = 'The version of the grammar and/or language'
-"About"    = 'A short description of the grammar'
-"Start Symbol" = <Lines>
+﻿"Start Symbol" = <Lines>
 "Case Sensitive" = True
 
 {WS}           = {Whitespace} - {CR} - {LF}
@@ -12,26 +8,35 @@ CommentL        = '%' {Printable}*
 
 <nl>     ::= NewLine <nl>          !One or more
           |  NewLine
-<nl Opt> ::= NewLine <nl Opt>      !Zero or more
+          
 
-Action = [abcdefghijklmnopqrstuvwxyz]+
-Variable = [ABCDEFGHIJKLMNOPQRSTUVWXYZ]
-Proposition = true | false
-           
-<muForm> ::= Proposition
+Variable    = [ABCDEFGHIJKLMNOPQRSTUVWXYZ]
+Identifier  = [abcdefghijklmnopqrstuvwxyz]+            
+
+<Multiplier> ::= '+' | '*' | 
+              
+<regForm>      ::= <regForm> '+' <regFormSeq>
+                |  <regFormSeq>
+<regFormSeq>   ::= <regFormSeq> '.' <regForm>  
+                |  <regFormValue> 
+<regFormValue> ::= Identifier <Multiplier>
+                |  '(' <regForm> ')' <Multiplier>
+
+
+<muForm> ::= Identifier
        | Variable
-       | '(' <muForm> '||' <muForm> ')'
-       | '(' <muForm> '&&' <muForm> ')'
-       | '<' Action '>' <muForm>
-       | '[' Action ']' <muForm>
+       | <muForm> '||' <muForm>
+       | <muForm> '&&' <muForm> 
+       | '<' <regForm> '>' <muForm>
+       | '[' <regForm> ']' <muForm>
        | 'mu' Variable '.' <muForm>
-       | 'nu' Variable '.' <muForm>
+       | 'nu' Variable '.' <muForm> 
        | 'not' <muForm>
        | '(' <muForm> ')'
        
 <Line> ::= CommentL <nl>
          | <muForm> <nl>
-         | <nl>
+         | <nl> 
          
 <Lines> ::= <Line><Lines>
-           | 
+           |     

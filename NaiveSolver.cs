@@ -4,25 +4,8 @@ using System.IO;
 using System.Linq;
 
 namespace ModelChecker {
-	class EmersonLei {
-
-		private static void Init(IEnumerable<Variable> variables, LTS lts, Environment env) {
-			foreach (var v in variables) {
-				if (v.Parent is Mu)
-					env[v] = new HashSet<LTSState>();
-				else if (v.Parent is Nu)
-					env[v] = new HashSet<LTSState>(lts.States);
-			}
-		}
-
-		public static HashSet<LTSState> Solve(MuFormula formula, LTS lts, Environment env, bool init = true) {
-
-			if (init) {
-				var allVariables = new List<Variable>();
-				if (formula is Variable) allVariables.Add((Variable)formula);
-				allVariables.AddRange(formula.SubFormulas.OfType<Variable>());
-				Init(allVariables, lts, env);
-			}
+	class NaiveSolver {
+		public static HashSet<LTSState> Solve(MuFormula formula, LTS lts, Environment env) {
 
 			if (formula is Proposition) {
 				var prop = formula as Proposition;
@@ -63,9 +46,8 @@ namespace ModelChecker {
 
 				return new HashSet<LTSState>(lts.States.Where(
 					// states where, for all outtransitions with action a, the Formula holds in the direct successor 
-												state =>
-												state.OutTransitions.All(tr => tr.Action != box.Action || fe.Contains(tr.Right))
-												));
+					state => state.OutTransitions.All(tr => tr.Action != box.Action || fe.Contains(tr.Right))
+					));
 			}
 
 			else if (formula is Diamond) {
@@ -79,13 +61,7 @@ namespace ModelChecker {
 
 			else if (formula is Mu) {
 				var mu = formula as Mu;
-				if (mu.Parent is Nu) {
-					// surrounding binder is nu
-					// reset open subformulae of form mu Xk.g set env[k]=false
-					foreach (var openMu in formula.SubFormulas.OfType<Mu>().Where(f => !f.IsBound())) {
-						env[openMu.Variable] = new HashSet<LTSState>();
-					}
-				}
+				env[mu.Variable] = new HashSet<LTSState>();
 
 				return FixedPoint.LFP(delegate(Tuple<HashSet<LTSState>, LTS, Environment> tuple) {
 					// repeats tau: X := solve(f)
@@ -98,15 +74,7 @@ namespace ModelChecker {
 
 			else if (formula is Nu) {
 				var nu = formula as Nu;
-
-
-				if (nu.Parent is Mu) {
-					// surrounding binder is mu
-					// reset open subformulae of form nu Xk.g set env[k]=true
-					foreach (var openNu in formula.SubFormulas.OfType<Nu>().Where(f => !f.IsBound())) {
-						env[openNu.Variable] = new HashSet<LTSState>(lts.States);
-					}
-				}
+				env[nu.Variable] = new HashSet<LTSState>(lts.States);
 
 				return FixedPoint.GFP(delegate(Tuple<HashSet<LTSState>, LTS, Environment> tuple) {
 					// repeats tau: X := solve(f)
@@ -119,7 +87,11 @@ namespace ModelChecker {
 
 			}
 
-			throw new InvalidDataException("formula not valid in our grammar");
+
+			throw new InvalidDataException("not a valid formula in our grammar");
+
 		}
+
+
 	}
 }

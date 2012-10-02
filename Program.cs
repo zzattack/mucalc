@@ -20,7 +20,7 @@ namespace ModelChecker {
             var parser = new MuCalculusParser();
             parser.Setup();
             var fileStream = new FileStream(formulasPath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
-            bool parseResult = parser.Parse(new StreamReader(fileStream, Encoding.Default));
+			bool parseResult = parser.Parse(new StreamReader(fileStream, Encoding.Default));
             fileStream.Close();
             if (!parseResult)
                 Log("Failed to parse!");

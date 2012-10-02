@@ -47,6 +47,7 @@
     <Compile Include="EmersonLei.cs" />
     <Compile Include="Environment.cs" />
     <Compile Include="FixedPoint.cs" />
+    <Compile Include="FormulaRewriter.cs" />
     <Compile Include="LTS.cs" />
     <Compile Include="LTSTransition.cs" />
     <Compile Include="MuCalculusParser.cs" />
@@ -56,6 +57,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LTSState.cs" />
+    <Compile Include="RegularFormula.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
