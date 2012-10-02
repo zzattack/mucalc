@@ -7,7 +7,7 @@ namespace ModelChecker {
 		Func<Tuple<HashSet<LTSState>, LTS, Environment>,
 		Tuple<HashSet<LTSState>>, LTS, Environment>;
 
-	public abstract class MuFormula {
+	abstract class MuFormula {
 		//public abstract HashSet<LTSState> Evaluate(Environment env, LTS lts);
 		public abstract int NestingDepth { get; }
 		public abstract int AlternationDepth { get; }
@@ -28,6 +28,10 @@ namespace ModelChecker {
 			Parent = parent;
 			foreach (var f in SubFormulas)
 				f.SetParents(this);
+		}
+
+		public List<Variable> FreeVariables {
+			get { return AllSubFormulas.OfType<Variable>().Where(var => !var.IsBound(this)).ToList(); }
 		}
 	}
 
@@ -98,8 +102,21 @@ namespace ModelChecker {
 			do {
 				if (parent is Mu && ((Mu)parent).Formula.Equals(this)) return true;
 				else if (parent is Nu && ((Nu)parent).Formula.Equals(this)) return true;
+				parent = parent.Parent;
 			} while (parent != subFormula);
 			return false;
+		}
+
+		public MuFormula Binder {
+			get {
+				var p = Parent;
+				while (p != null) {
+					if (p is Mu && ((Mu)p).Variable.Equals(this)) break;
+					if (p is Nu && ((Nu)p).Variable.Equals(this)) break;
+					p = p.Parent;
+				}
+				return p;
+			}
 		}
 	}
 
@@ -280,10 +297,6 @@ namespace ModelChecker {
 		public override List<MuFormula> SubFormulas {
 			get { return new List<MuFormula> { Formula }; }
 		}
-
-		public bool IsBound() {
-			return SubFormulas.OfType<Variable>().Any(var => var.IsBound(this));
-		}
 	}
 
 	class Nu : MuFormula {
@@ -314,10 +327,5 @@ namespace ModelChecker {
 		public override List<MuFormula> SubFormulas {
 			get { return new List<MuFormula> { Formula }; }
 		}
-
-		public bool IsBound() {
-			return AllSubFormulas.OfType<Variable>().Any(var => var.IsBound(this));
-		}
-
 	}
 }

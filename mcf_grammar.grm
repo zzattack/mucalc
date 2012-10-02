@@ -25,15 +25,14 @@ Identifier  = [abcdefghijklmnopqrstuvwxyz]+
 
 <muForm> ::= Identifier
        | Variable
-       | <muForm> '||' <muForm>
-       | <muForm> '&&' <muForm> 
+       | '('<muForm> '||' <muForm> ')'
+       | '(' <muForm> '&&' <muForm> ')'
        | '<' <regForm> '>' <muForm>
        | '[' <regForm> ']' <muForm>
        | 'mu' Variable '.' <muForm>
        | 'nu' Variable '.' <muForm> 
        | 'not' <muForm>
-       | '(' <muForm> ')'
-       
+              
 <Line> ::= CommentL <nl>
          | <muForm> <nl>
          | <nl> 

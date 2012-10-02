@@ -22,19 +22,18 @@ namespace ModelChecker {
 			@Regformvalue_Lparen_Rparen = 10,          // <regFormValue> ::= '(' <regForm> ')' <Multiplier>
 			@Muform_Identifier = 11,                   // <muForm> ::= Identifier
 			@Muform_Variable = 12,                     // <muForm> ::= Variable
-			@Muform_Pipepipe = 13,                     // <muForm> ::= <muForm> '||' <muForm>
-			@Muform_Ampamp = 14,                       // <muForm> ::= <muForm> '&&' <muForm>
+			@Muform_Lparen_Pipepipe_Rparen = 13,       // <muForm> ::= '(' <muForm> '||' <muForm> ')'
+			@Muform_Lparen_Ampamp_Rparen = 14,         // <muForm> ::= '(' <muForm> '&&' <muForm> ')'
 			@Muform_Lt_Gt = 15,                        // <muForm> ::= '<' <regForm> '>' <muForm>
 			@Muform_Lbracket_Rbracket = 16,            // <muForm> ::= '[' <regForm> ']' <muForm>
 			@Muform_Mu_Variable_Dot = 17,              // <muForm> ::= mu Variable '.' <muForm>
 			@Muform_Nu_Variable_Dot = 18,              // <muForm> ::= nu Variable '.' <muForm>
 			@Muform_Not = 19,                          // <muForm> ::= not <muForm>
-			@Muform_Lparen_Rparen = 20,                // <muForm> ::= '(' <muForm> ')'
-			@Line_Commentl = 21,                       // <Line> ::= CommentL <nl>
-			@Line = 22,                                // <Line> ::= <muForm> <nl>
-			@Line2 = 23,                               // <Line> ::= <nl>
-			@Lines = 24,                               // <Lines> ::= <Line> <Lines>
-			@Lines2 = 25                               // <Lines> ::= 
+			@Line_Commentl = 20,                       // <Line> ::= CommentL <nl>
+			@Line = 21,                                // <Line> ::= <muForm> <nl>
+			@Line2 = 22,                               // <Line> ::= <nl>
+			@Lines = 23,                               // <Lines> ::= <Line> <Lines>
+			@Lines2 = 24                               // <Lines> ::= 
 		}
 
 		public object program;
@@ -183,14 +182,14 @@ namespace ModelChecker {
 					result = new Variable((string)r[0].Data);
 					break;
 
-				case ProductionIndex.Muform_Pipepipe:
-					// <muForm> ::= <muForm> '||' <muForm>
-					result = new Disjunction((MuFormula)r[0].Data, (MuFormula)r[2].Data);
+				case ProductionIndex.Muform_Lparen_Pipepipe_Rparen:
+					// <muForm> ::= '(' <muForm> '||' <muForm> ')'
+					result = new Disjunction((MuFormula)r[1].Data, (MuFormula)r[3].Data);
 					break;
 
-				case ProductionIndex.Muform_Ampamp:
-					// <muForm> ::= <muForm> '&&' <muForm>
-					result = new Conjunction((MuFormula)r[0].Data, (MuFormula)r[2].Data);
+				case ProductionIndex.Muform_Lparen_Ampamp_Rparen:
+					// <muForm> ::= '(' <muForm> '&&' <muForm> ')'
+					result = new Conjunction((MuFormula)r[1].Data, (MuFormula)r[3].Data);
 					break;
 
 				case ProductionIndex.Muform_Lt_Gt:
@@ -217,12 +216,7 @@ namespace ModelChecker {
 					// <muForm> ::= not <muForm>
 					result = new Negation((MuFormula)r[1].Data);
 					break;
-
-				case ProductionIndex.Muform_Lparen_Rparen:
-					// <muForm> ::= '(' <muForm> ')'
-					result = r[1].Data;
-					break;
-
+					
 				case ProductionIndex.Line_Commentl:
 					// <Line> ::= CommentL <nl>
 					break;
@@ -230,11 +224,10 @@ namespace ModelChecker {
 				case ProductionIndex.Line:
 					// <Line> ::= <muForm> <nl>
 					var form = (MuFormula)r[0].Data;
-					form.SetParents(null /* root has no parent */);
-
 					FormulaRewriter.ResetFreeVars();
 					form = FormulaRewriter.Rewrite(form);
 
+					form.SetParents(null /* root has no parent */);
 					formulas.Add(form);
 					break;
 

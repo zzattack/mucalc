@@ -8,9 +8,9 @@ namespace ModelChecker {
 
 		private static void Init(IEnumerable<Variable> variables, LTS lts, Environment env) {
 			foreach (var v in variables) {
-				if (v.Parent is Mu)
+				if (v.Binder is Mu)
 					env[v] = new HashSet<LTSState>();
-				else if (v.Parent is Nu)
+				else if (v.Binder is Nu)
 					env[v] = new HashSet<LTSState>(lts.States);
 			}
 		}
@@ -20,8 +20,8 @@ namespace ModelChecker {
 			if (init) {
 				var allVariables = new List<Variable>();
 				if (formula is Variable) allVariables.Add((Variable)formula);
-				allVariables.AddRange(formula.SubFormulas.OfType<Variable>());
-				Init(allVariables, lts, env);
+				allVariables.AddRange(formula.AllSubFormulas.OfType<Variable>());
+				Init(allVariables.Distinct(), lts, env);
 			}
 
 			if (formula is Proposition) {
@@ -36,21 +36,21 @@ namespace ModelChecker {
 			else if (formula is Negation) {
 				var neg = formula as Negation;
 				return new HashSet<LTSState>(lts.States.Except(
-					Solve(neg.Formula, lts, env)));
+					Solve(neg.Formula, lts, env, false)));
 			}
 
 			else if (formula is Conjunction) {
 				var conj = formula as Conjunction;
-				var leftStates = Solve(conj.Left, lts, env);
-				var rightStates = Solve(conj.Right, lts, env);
+				var leftStates = Solve(conj.Left, lts, env, false);
+				var rightStates = Solve(conj.Right, lts, env, false);
 				return new HashSet<LTSState>(leftStates.Intersect(rightStates));
 			}
 
 
 			else if (formula is Disjunction) {
 				var disj = formula as Disjunction;
-				var leftStates = Solve(disj.Left, lts, env);
-				var rightStates = Solve(disj.Right, lts, env);
+				var leftStates = Solve(disj.Left, lts, env, false);
+				var rightStates = Solve(disj.Right, lts, env, false);
 				return new HashSet<LTSState>(leftStates.Union(rightStates));
 			}
 
@@ -59,13 +59,13 @@ namespace ModelChecker {
 
 				// box a f = { s | forall t. s -a-> t ==> t in [[f]]e }
 				// i.e. the set of states for which all a-transitions go to a state in which f holds
-				var fe = Solve(box.Formula, lts, env);
+				var fe = Solve(box.Formula, lts, env, false);
 
 				return new HashSet<LTSState>(lts.States.Where(
 					// states where, for all outtransitions with action a, the Formula holds in the direct successor 
-												state =>
-												state.OutTransitions.All(tr => tr.Action != box.Action || fe.Contains(tr.Right))
-												));
+					state =>
+					state.OutTransitions.All(tr => tr.Action != box.Action || fe.Contains(tr.Right))
+					));
 			}
 
 			else if (formula is Diamond) {
@@ -74,7 +74,7 @@ namespace ModelChecker {
 					// <a>f == [a](not f)
 					new Box(diamond.RegularFormula, new Negation(diamond.Formula))
 					);
-				return Solve(shorthand, lts, env);
+				return Solve(shorthand, lts, env, false);
 			}
 
 			else if (formula is Mu) {
@@ -82,32 +82,45 @@ namespace ModelChecker {
 				if (mu.Parent is Nu) {
 					// surrounding binder is nu
 					// reset open subformulae of form mu Xk.g set env[k]=false
-					foreach (var openMu in formula.SubFormulas.OfType<Mu>().Where(f => !f.IsBound())) {
-						env[openMu.Variable] = new HashSet<LTSState>();
-					}
+					foreach (var innerMu in formula.AllSubFormulas.OfType<Mu>().Where(m => m.FreeVariables.Count > 0))
+						env[innerMu.Variable] = new HashSet<LTSState>();
 				}
 
+
+				HashSet<LTSState> Xold;
+				do {
+					Xold = env[mu.Variable];
+					env[mu.Variable] = Solve(mu.Formula, lts, env, false);
+				} while (Xold.Count != env[mu.Variable].Count);
+				return env[mu.Variable];
+
+				/*
 				return FixedPoint.LFP(delegate(Tuple<HashSet<LTSState>, LTS, Environment> tuple) {
 					// repeats tau: X := solve(f)
 					var X = tuple.Item1;
 					X = Solve(mu.Formula, lts, env);
 					env[mu.Variable] = X;
 					return Tuple.Create(X, lts, env);
-				}, lts, env);
+				}, lts, env);*/
 			}
 
 			else if (formula is Nu) {
 				var nu = formula as Nu;
-
-
 				if (nu.Parent is Mu) {
 					// surrounding binder is mu
 					// reset open subformulae of form nu Xk.g set env[k]=true
-					foreach (var openNu in formula.SubFormulas.OfType<Nu>().Where(f => !f.IsBound())) {
-						env[openNu.Variable] = new HashSet<LTSState>(lts.States);
-					}
+					foreach (var innerNu in formula.AllSubFormulas.OfType<Nu>().Where(m => m.FreeVariables.Count > 0))
+						env[innerNu.Variable] = new HashSet<LTSState>(lts.States);
 				}
 
+				HashSet<LTSState> Xold;
+				do {
+					Xold = env[nu.Variable];
+					env[nu.Variable] = Solve(nu.Formula, lts, env, false);
+				} while (Xold.Count != env[nu.Variable].Count);
+				return env[nu.Variable];
+
+				/*
 				return FixedPoint.GFP(delegate(Tuple<HashSet<LTSState>, LTS, Environment> tuple) {
 					// repeats tau: X := solve(f)
 					var X = tuple.Item1;
@@ -116,7 +129,7 @@ namespace ModelChecker {
 
 					return Tuple.Create(X, lts, env);
 				}, lts, env);
-
+				*/
 			}
 
 			throw new InvalidDataException("formula not valid in our grammar");
