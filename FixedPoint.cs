@@ -7,7 +7,7 @@ namespace ModelChecker {
         Func<Tuple<HashSet<LTSState>, LTS, Environment>,
 			  Tuple<HashSet<LTSState>, LTS, Environment>>;
 
-    public static class FixedPoint {
+    static class FixedPoint {
 		public static HashSet<LTSState> LFP(PredicateTransformer tau, LTS lts, Environment env) {
             var Q = Tuple.Create(new HashSet<LTSState>(), lts, env);
             var QPrime = tau(Q);
@@ -30,10 +30,6 @@ namespace ModelChecker {
             }
 
             return Q.Item1;
-        }
-
-        internal static HashSet<LTSState> GFP(Func<Tuple<HashSet<LTSState>, Environment>, Tuple<HashSet<LTSState>>, Environment> tau, Environment env) {
-            throw new NotImplementedException();
         }
     }
 }

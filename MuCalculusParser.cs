@@ -2,188 +2,190 @@
 
 using System.Collections.Generic;
 using System.IO;
-using System.Windows.Forms;
-using ModelChecker;
+using GOLD;
 
-class MuCalculusParser {
-    public List<MuFormula> formulas = new List<MuFormula>();
-    private GOLD.Parser parser = new GOLD.Parser();
-    
-    private enum ProductionIndex {
-        @Nl_Newline = 0,                           // <nl> ::= NewLine <nl>
-        @Nl_Newline2 = 1,                          // <nl> ::= NewLine
-        @Nlopt_Newline = 2,                        // <nl Opt> ::= NewLine <nl Opt>
-        @Muform_Proposition = 3,                   // <muForm> ::= Proposition
-        @Muform_Variable = 4,                      // <muForm> ::= Variable
-        @Muform_Lparen_Pipepipe_Rparen = 5,        // <muForm> ::= '(' <muForm> '||' <muForm> ')'
-        @Muform_Lparen_Ampamp_Rparen = 6,          // <muForm> ::= '(' <muForm> '&&' <muForm> ')'
-        @Muform_Lt_Action_Gt = 7,                  // <muForm> ::= '<' Action '>' <muForm>
-        @Muform_Lbracket_Action_Rbracket = 8,      // <muForm> ::= '[' Action ']' <muForm>
-        @Muform_Mu_Variable_Dot = 9,               // <muForm> ::= mu Variable '.' <muForm>
-        @Muform_Nu_Variable_Dot = 10,              // <muForm> ::= nu Variable '.' <muForm>
-        @Muform_Not = 11,                          // <muForm> ::= not <muForm>
-        @Muform_Lparen_Rparen = 12,                // <muForm> ::= '(' <muForm> ')'
-        @Line_Commentl = 13,                       // <Line> ::= CommentL <nl>
-        @Line = 14,                                // <Line> ::= <muForm> <nl>
-        @Line2 = 15,                               // <Line> ::= <nl>
-        @Lines = 16,                               // <Lines> ::= <Line> <Lines>
-        @Lines2 = 17                               // <Lines> ::= 
-    }
-	
-    public void Setup() {
-        //This procedure can be called to load the parse tables. The class can
-        //read tables using a BinaryReader.
+namespace ModelChecker {
+	class MuCalculusParser {
+		public List<MuFormula> formulas = new List<MuFormula>();
+		private readonly Parser parser = new Parser();
 
-        parser.LoadTables("mucalc.egt");
-    }
+		private enum ProductionIndex {
+			@Nl_Newline = 0,                           // <nl> ::= NewLine <nl>
+			@Nl_Newline2 = 1,                          // <nl> ::= NewLine
+			@Nlopt_Newline = 2,                        // <nl Opt> ::= NewLine <nl Opt>
+			@Muform_Proposition = 3,                   // <muForm> ::= Proposition
+			@Muform_Variable = 4,                      // <muForm> ::= Variable
+			@Muform_Lparen_Pipepipe_Rparen = 5,        // <muForm> ::= '(' <muForm> '||' <muForm> ')'
+			@Muform_Lparen_Ampamp_Rparen = 6,          // <muForm> ::= '(' <muForm> '&&' <muForm> ')'
+			@Muform_Lt_Action_Gt = 7,                  // <muForm> ::= '<' Action '>' <muForm>
+			@Muform_Lbracket_Action_Rbracket = 8,      // <muForm> ::= '[' Action ']' <muForm>
+			@Muform_Mu_Variable_Dot = 9,               // <muForm> ::= mu Variable '.' <muForm>
+			@Muform_Nu_Variable_Dot = 10,              // <muForm> ::= nu Variable '.' <muForm>
+			@Muform_Not = 11,                          // <muForm> ::= not <muForm>
+			@Muform_Lparen_Rparen = 12,                // <muForm> ::= '(' <muForm> ')'
+			@Line_Commentl = 13,                       // <Line> ::= CommentL <nl>
+			@Line = 14,                                // <Line> ::= <muForm> <nl>
+			@Line2 = 15,                               // <Line> ::= <nl>
+			@Lines = 16,                               // <Lines> ::= <Line> <Lines>
+			@Lines2 = 17                               // <Lines> ::= 
+		}
 
-    public bool Parse(TextReader reader) {
-        //This procedure starts the GOLD Parser Engine and handles each of the
-        //messages it returns. Each time a reduction is made, you can create new
-        //custom object and reassign the .CurrentReduction property. Otherwise, 
-        //the system will use the Reduction object that was returned.
-        //
-        //The resulting tree will be a pure representation of the language 
-        //and will be ready to implement.
+		public void Setup() {
+			//This procedure can be called to load the parse tables. The class can
+			//read tables using a BinaryReader.
 
-        GOLD.ParseMessage response;
-        bool done;                      //Controls when we leave the loop
-        bool accepted = false;          //Was the parse successful?
+			parser.LoadTables("mucalc.egt");
+		}
 
-        parser.Open(reader);
-        parser.TrimReductions = false;  //Please read about this feature before enabling  
+		public bool Parse(TextReader reader) {
+			//This procedure starts the GOLD Parser Engine and handles each of the
+			//messages it returns. Each time a reduction is made, you can create new
+			//custom object and reassign the .CurrentReduction property. Otherwise, 
+			//the system will use the Reduction object that was returned.
+			//
+			//The resulting tree will be a pure representation of the language 
+			//and will be ready to implement.
 
-        done = false;
-        while (!done) {
-            response = parser.Parse();
+			bool accepted = false;          //Was the parse successful?
 
-            switch (response) {
-                case GOLD.ParseMessage.LexicalError:
-                    //Cannot recognize token
-                    done = true;
-                    break;
+			parser.Open(reader);
+			parser.TrimReductions = false;  //Please read about this feature before enabling  
 
-                case GOLD.ParseMessage.SyntaxError:
-                    //Expecting a different token
-                    done = true;
-                    break;
+			bool done = false;
+			while (!done) {
+				ParseMessage response = parser.Parse();
 
-                case GOLD.ParseMessage.Reduction:
-                    //Create a customized object to store the reduction
-                    parser.CurrentReduction = CreateNewObject(parser.CurrentReduction as GOLD.Reduction);
-                    break;
+				switch (response) {
+					case ParseMessage.LexicalError:
+						//Cannot recognize token
+						done = true;
+						break;
 
-                case GOLD.ParseMessage.Accept:
-                    //Accepted!
-                    //program = parser.CurrentReduction   //The root node!                 
-                    done = true;
-                    accepted = true;
-                    break;
+					case ParseMessage.SyntaxError:
+						//Expecting a different token
+						done = true;
+						break;
 
-                case GOLD.ParseMessage.TokenRead:
-                    //You don't have to do anything here.
-                    break;
+					case ParseMessage.Reduction:
+						//Create a customized object to store the reduction
+						parser.CurrentReduction = CreateNewObject(parser.CurrentReduction as Reduction);
+						break;
 
-                case GOLD.ParseMessage.InternalError:
-                    //INTERNAL ERROR! Something is horribly wrong.
-                    done = true;
-                    break;
+					case ParseMessage.Accept:
+						//Accepted!
+						//program = parser.CurrentReduction   //The root node!                 
+						done = true;
+						accepted = true;
+						break;
 
-                case GOLD.ParseMessage.NotLoadedError:
-                    //This error occurs if the CGT was not loaded.                   
-                    done = true;
-                    break;
+					case ParseMessage.TokenRead:
+						//You don't have to do anything here.
+						break;
 
-                case GOLD.ParseMessage.GroupError:
-                    //GROUP ERROR! Unexpected end of file
-                    done = true;
-                    break;
-            }
-        } //while
+					case ParseMessage.InternalError:
+						//INTERNAL ERROR! Something is horribly wrong.
+						done = true;
+						break;
 
-        return accepted;
-    }
+					case ParseMessage.NotLoadedError:
+						//This error occurs if the CGT was not loaded.                   
+						done = true;
+						break;
 
-    private object CreateNewObject(GOLD.Reduction r) {
-        object result = null;
+					case ParseMessage.GroupError:
+						//GROUP ERROR! Unexpected end of file
+						done = true;
+						break;
+				}
+			} //while
 
-        switch ((ProductionIndex)r.Parent.TableIndex()) {
-            case ProductionIndex.Nl_Newline:
-                // <nl> ::= NewLine <nl>
-                break;
+			return accepted;
+		}
 
-            case ProductionIndex.Nl_Newline2:
-                // <nl> ::= NewLine
-                break;
+		private object CreateNewObject(Reduction r) {
+			object result = null;
 
-            case ProductionIndex.Nlopt_Newline:
-                // <nl Opt> ::= NewLine <nl Opt>
-                break;
+			switch ((ProductionIndex)r.Parent.TableIndex()) {
+				case ProductionIndex.Nl_Newline:
+					// <nl> ::= NewLine <nl>
+					break;
 
-            case ProductionIndex.Muform_Proposition:
-                // <muForm> ::= Proposition
-                return new Proposition((string)r[0].Data);
+				case ProductionIndex.Nl_Newline2:
+					// <nl> ::= NewLine
+					break;
 
-            case ProductionIndex.Muform_Variable:
-                // <muForm> ::= Variable
-                return new Variable(r[0].Data.ToString());
+				case ProductionIndex.Nlopt_Newline:
+					// <nl Opt> ::= NewLine <nl Opt>
+					break;
 
-            case ProductionIndex.Muform_Lparen_Pipepipe_Rparen:
-                // <muForm> ::= '(' <muForm> '||' <muForm> ')'
-                return new Disjunction(r[1].Data as MuFormula, r[3].Data as MuFormula);
+				case ProductionIndex.Muform_Proposition:
+					// <muForm> ::= Proposition
+					return new Proposition((string)r[0].Data);
 
-            case ProductionIndex.Muform_Lparen_Ampamp_Rparen:
-                // <muForm> ::= '(' <muForm> '&&' <muForm> ')'
-                return new Conjunction((MuFormula)r[1].Data, (MuFormula)r[3].Data);
+				case ProductionIndex.Muform_Variable:
+					// <muForm> ::= Variable
+					return new Variable(r[0].Data.ToString());
 
-            case ProductionIndex.Muform_Lt_Action_Gt:
-                // <muForm> ::= '<' Action '>' <muForm>
-                return new Diamond((string)r[1].Data, (MuFormula)r[3].Data);
+				case ProductionIndex.Muform_Lparen_Pipepipe_Rparen:
+					// <muForm> ::= '(' <muForm> '||' <muForm> ')'
+					return new Disjunction(r[1].Data as MuFormula, r[3].Data as MuFormula);
 
-            case ProductionIndex.Muform_Lbracket_Action_Rbracket:
-                // <muForm> ::= '[' Action ']' <muForm>
-                return new Box((string)r[1].Data, (MuFormula)r[3].Data);
+				case ProductionIndex.Muform_Lparen_Ampamp_Rparen:
+					// <muForm> ::= '(' <muForm> '&&' <muForm> ')'
+					return new Conjunction((MuFormula)r[1].Data, (MuFormula)r[3].Data);
 
-            case ProductionIndex.Muform_Mu_Variable_Dot:
-                // <muForm> ::= mu Variable '.' <muForm>
-                return new Mu(new Variable((string)r[1].Data), (MuFormula)r[3].Data);
+				case ProductionIndex.Muform_Lt_Action_Gt:
+					// <muForm> ::= '<' Action '>' <muForm>
+					return new Diamond((string)r[1].Data, (MuFormula)r[3].Data);
 
-            case ProductionIndex.Muform_Nu_Variable_Dot:
-                // <muForm> ::= nu Variable '.' <muForm>
-                return new Nu(new Variable((string)r[1].Data), (MuFormula)r[3].Data);
+				case ProductionIndex.Muform_Lbracket_Action_Rbracket:
+					// <muForm> ::= '[' Action ']' <muForm>
+					return new Box((string)r[1].Data, (MuFormula)r[3].Data);
 
-            case ProductionIndex.Muform_Not:
-                // <muForm> ::= not <muForm>
-                return new Negation((MuFormula)r[1].Data);
+				case ProductionIndex.Muform_Mu_Variable_Dot:
+					// <muForm> ::= mu Variable '.' <muForm>
+					return new Mu(new Variable((string)r[1].Data), (MuFormula)r[3].Data);
 
-            case ProductionIndex.Muform_Lparen_Rparen:
-                // <muForm> ::= '(' <muForm> ')'
-                return (MuFormula)r[1].Data;
+				case ProductionIndex.Muform_Nu_Variable_Dot:
+					// <muForm> ::= nu Variable '.' <muForm>
+					return new Nu(new Variable((string)r[1].Data), (MuFormula)r[3].Data);
 
-            case ProductionIndex.Line_Commentl:
-                // <Line> ::= CommentL <nl>
-                break;
+				case ProductionIndex.Muform_Not:
+					// <muForm> ::= not <muForm>
+					return new Negation((MuFormula)r[1].Data);
 
-            case ProductionIndex.Line:
-                // <Line> ::= <muForm> <nl>
-                formulas.Add((MuFormula)r[0].Data);
-                break;
+				case ProductionIndex.Muform_Lparen_Rparen:
+					// <muForm> ::= '(' <muForm> ')'
+					return (MuFormula)r[1].Data;
 
-            case ProductionIndex.Line2:
-                // <Line> ::= <nl>
-                break;
+				case ProductionIndex.Line_Commentl:
+					// <Line> ::= CommentL <nl>
+					break;
 
-            case ProductionIndex.Lines:
-                // <Lines> ::= <Line> <Lines>
-                break;
+				case ProductionIndex.Line:
+					// <Line> ::= <muForm> <nl>
+					// we've parsed the entire formula, so we can now set the parents of each subformula
+					var form = (MuFormula)r[0].Data;
+					form.SetParents(null /* root has no parent */);
+					formulas.Add(form);
+					break;
 
-            case ProductionIndex.Lines2:
-                // <Lines> ::= 
-                break;
+				case ProductionIndex.Line2:
+					// <Line> ::= <nl>
+					break;
 
-        }  //switch
+				case ProductionIndex.Lines:
+					// <Lines> ::= <Line> <Lines>
+					break;
 
-        return result;
-    }
+				case ProductionIndex.Lines2:
+					// <Lines> ::= 
+					break;
 
-};
+			}  //switch
+
+			return result;
+		}
+
+	};
+}

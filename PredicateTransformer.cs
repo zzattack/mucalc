@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ModelChecker;
-using Environment = ModelChecker.Environment;
 
 namespace ModelChecker {
+
+	// the used predicate transformer is very generic and can be used for predicates
+	// such as PreR, PostR as well as fixpoint calculations
+
     using PredicateTransformer =
         Func<Tuple<HashSet<LTSState>, LTS, Environment>,
 			  Tuple<HashSet<LTSState>, LTS, Environment>>;
 
-    public static class Transformers {
+    static class Transformers {
         static Transformers() { }
 
 		public static PredicateTransformer PreR = delegate(Tuple<HashSet<LTSState>, LTS, Environment> tuple) {

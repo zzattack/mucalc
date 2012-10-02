@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
 
 namespace ModelChecker {
-    static class Program {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        static void Main(string[] args) {
+	static class Program {
+		static Stopwatch sw = Stopwatch.StartNew();
+		
+		/// <summary>
+		/// The main entry point for the application.
+		/// </summary>
+		[STAThread]
+		static void Main(string[] args) {
             string ltsPath = args[0];
             string formulasPath = args[1];
 
@@ -21,27 +23,33 @@ namespace ModelChecker {
             bool parseResult = parser.Parse(new StreamReader(fileStream, Encoding.Default));
             fileStream.Close();
             if (!parseResult)
-                Console.WriteLine("Failed to parse!");
+                Log("Failed to parse!");
 
-            Environment env = new Environment();
             LTS lts = LTS.Parse(ltsPath);
 
-            foreach (MuFormula f in parser.formulas) {
-                Console.WriteLine("----------------------------------");
-                OutputResult(f, f.Evaluate(env.Clone(), lts));
+			foreach (MuFormula f in parser.formulas) {
+				Log("----------------------------------");
+				OutputResult(f, lts);
             }
 
-            Console.WriteLine();
+            Log();
             Console.ReadKey();
         }
 
-        private static void OutputResult(MuFormula f, HashSet<LTSState> hashSet) {
-            Console.WriteLine("Formula {0}");
-            Console.Write("\t ND: {0}, AD: {1}, DAD: {2}", f.NestingDepth, f.AlternationDepth, f.DependentAlternationDepth);
-            if (hashSet.Count == 0)
-                Console.WriteLine("\tHolds in no states");
-            else
-                Console.WriteLine("\tHolds in {0}", string.Join(", ", hashSet));
-        }
-    }
+		private static void OutputResult(MuFormula f, LTS lts) {
+			Log("Formula {0}", f);
+			Log("\t ND: {0}, AD: {1}, DAD: {2}", f.NestingDepth, f.AlternationDepth, f.DependentAlternationDepth);
+			
+			var naiveSol = NaiveSolver.Solve(f, lts, new Environment());
+			Log("\tNAIVE: {0}", naiveSol.Contains(lts.InitialState));
+			
+			var emersonLeiSol = EmersonLei.Solve(f, lts, new Environment());
+			Log("\tEMLEI: {0}", emersonLeiSol.Contains(lts.InitialState));
+
+		}
+
+		static void Log(string format = "", params object[] p) {
+			Console.WriteLine(string.Format("[{0:00000}] -- {1}", sw.ElapsedMilliseconds, string.Format(format, p)));
+		}
+	}
 }

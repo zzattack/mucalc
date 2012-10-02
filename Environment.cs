@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace ModelChecker {
-	public class Environment : Dictionary<Variable, HashSet<LTSState>> {
+	class Environment : Dictionary<Variable, HashSet<LTSState>> {
 
 		public Environment Clone() {
 			var ret = new Environment();

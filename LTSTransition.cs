@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace ModelChecker {
-    public class LTSTransition {
+﻿namespace ModelChecker {
+    class LTSTransition {
         public LTSState Left;
         public LTSState Right;
         public string Action;

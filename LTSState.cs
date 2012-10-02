@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace ModelChecker {
-    public class LTSState {
-        public string Name;
+    class LTSState {
+        public readonly string Name;
         public LTS LTS;
 
         public LTSState(string name, LTS lts) {
@@ -38,6 +36,10 @@ namespace ModelChecker {
         public override bool Equals(object obj) {
             return ((LTSState)obj).Name == Name;
         }
+
+		public override int GetHashCode() {
+			return Name.GetHashCode();
+		}
 
     }
 }
