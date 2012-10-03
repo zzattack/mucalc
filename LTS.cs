@@ -44,7 +44,10 @@ namespace ModelChecker {
 					ret.Actions.Add(label);
 					ret.Transitions.Add(trans);
 					startState.AddOutTransition(trans);
-					endState.AddInTransition(trans);
+					//endState.AddInTransition(trans);
+				}
+				else {
+					int i = 0;
 				}
 			}
 
@@ -64,7 +67,7 @@ namespace ModelChecker {
 			return state;
 		}
 
-		public LTSState InitialState { get; private set; }
+		public LTSState InitialState { get; internal set; }
 
 		internal void SaveTo(string path) {
 			var sw = new StreamWriter(path);

@@ -66,6 +66,9 @@ namespace ModelChecker {
 		}
 
 		public override bool Matches(string actionName) {
+			if (Action.Equals("true")) return true;
+			else if (Action.Equals("false")) return false;
+
 			return WildMatch(Action, actionName);
 		}
 
@@ -126,18 +129,18 @@ namespace ModelChecker {
 		}
 	}
 
-	class PlusFormula : RegularFormula {
+	class UnionFormula : RegularFormula {
 		public RegularFormula Left, Right;
-		public PlusFormula(RegularFormula left, RegularFormula right, string multiplier)
-			: base(multiplier) {
+		public UnionFormula(RegularFormula left, RegularFormula right)
+			: base("") {
 			Left = left;
 			Right = right;
 		}
 		public override string ToString() {
-			return "(" + Left + "+" + Right + ")" + Multiplier;
+			return "(" + Left + "||" + Right + ")" + Multiplier;
 		}
 		public override RegularFormula Clone() {
-			return new PlusFormula(Left.Clone(), Right.Clone(), Multiplier);
+			return new UnionFormula(Left.Clone(), Right.Clone());
 		}
 
 		public override bool Matches(string actionName) {

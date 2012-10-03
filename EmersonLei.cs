@@ -62,11 +62,14 @@ namespace ModelChecker {
 				// box a f = { s | forall t. s -a-> t ==> t in [[f]]e }
 				// i.e. the set of states for which all a-transitions go to a state in which f holds
 				var fe = Solve(box.Formula, lts, env, false);
-				
-				return new HashSet<LTSState>(lts.States.Where(
-					// states where, for all outtransitions with action a, the Formula holds in the direct successor 
-					state => state.GetOutTransitions(box.RegularFormula).All(tr => fe.Contains(tr.Right))
-				));
+
+				var hashSet = new HashSet<LTSState>();
+				foreach (var state in lts.States) {
+					var outTransitions = state.GetOutTransitions(box.RegularFormula);
+					if (outTransitions.All(tr => fe.Contains(tr.Right)))
+						hashSet.Add(state);
+				}
+				return hashSet;
 			}
 
 			else if (formula is Diamond) {
@@ -116,7 +119,7 @@ namespace ModelChecker {
 
 				HashSet<LTSState> Xold;
 				do {
-					Xold = env[nu.Variable];
+					Xold = env.GetVariable(nu.Variable);
 					env[nu.Variable] = Solve(nu.Formula, lts, env, false);
 				} while (Xold.Count != env[nu.Variable].Count);
 				return env[nu.Variable];

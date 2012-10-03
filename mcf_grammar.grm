@@ -10,11 +10,11 @@ CommentL        = '%' {Printable}*
           |  NewLine          
 
 Variable    = [ABCDEFGHIJKLMNOPQRSTUVWXYZ]
-Identifier  = [abcdefghijklmnopqrstuvwxyz(*)0123456789]+            
+Identifier  = [abcdefghijklmnopqrstuvwxyz] [(,)0123456789abcdefghijklmnopqrstuvwxyz]]+    
 
 <Multiplier> ::= '+' | '*' | 
               
-<regForm>      ::= <regForm> '+' <regFormSeq>
+<regForm>      ::= <regForm> '||' <regFormSeq>
                 |  <regFormSeq>
 <regFormSeq>   ::= <regFormSeq> '.' <regForm>  
                 |  <regFormValue> 

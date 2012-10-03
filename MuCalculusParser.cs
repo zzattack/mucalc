@@ -14,7 +14,7 @@ namespace ModelChecker {
 			@Multiplier_Plus = 2,                      // <Multiplier> ::= '+'
 			@Multiplier_Times = 3,                     // <Multiplier> ::= '*'
 			@Multiplier = 4,                           // <Multiplier> ::= 
-			@Regform_Plus = 5,                         // <regForm> ::= <regForm> '+' <regFormSeq>
+			Regform_Pipepipe = 5,                         // <regForm> ::= <regForm> '+' <regFormSeq>
 			@Regform = 6,                              // <regForm> ::= <regFormSeq>
 			@Regformseq_Dot = 7,                       // <regFormSeq> ::= <regFormSeq> '.' <regForm>
 			@Regformseq = 8,                           // <regFormSeq> ::= <regFormValue>
@@ -124,9 +124,9 @@ namespace ModelChecker {
 					// <nl> ::= NewLine
 					break;
 
-				case ProductionIndex.Regform_Plus:
-					// <regForm> ::= <regForm> '+' <regFormSeq>
-					result = new PlusFormula((RegularFormula)r[0].Data, (RegularFormula)r[2].Data, (string)r[3].Data);
+				case ProductionIndex.Regform_Pipepipe:
+					// <regForm> ::= <regForm> '||' <regFormSeq>
+					result = new UnionFormula((RegularFormula)r[0].Data, (RegularFormula)r[2].Data);
 					break;
 
 				case ProductionIndex.Regform:
@@ -231,7 +231,6 @@ namespace ModelChecker {
 					var form = (MuFormula)r[0].Data;
 					FormulaRewriter.ResetFreeVars();
 					form = FormulaRewriter.Rewrite(form);
-
 					form.SetParents(null /* root has no parent */);
 					formulas.Add(form);
 					break;

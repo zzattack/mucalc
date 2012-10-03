@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ModelChecker {
@@ -19,33 +20,32 @@ namespace ModelChecker {
 			return Name;
 		}
 
-		public List<LTSTransition> GetInTransitions(RegularFormula formula) {
+		public IEnumerable<LTSTransition> GetInTransitions(RegularFormula formula) {
 			var matchingActions = LTS.Actions.Where(formula.Matches);
 			var ret = new List<LTSTransition>();
 			foreach (var action in matchingActions) {
 				List<LTSTransition> list;
-				if (!_inTransitions.TryGetValue(action, out list))
-					list = _inTransitions[action] = new List<LTSTransition>();
-				ret.AddRange(list);
+				if (_inTransitions.TryGetValue(action, out list))
+					ret.AddRange(list);
 			}
 			return ret;
 		}
 
-		public List<LTSTransition> GetOutTransitions(RegularFormula formula) {
+		public IEnumerable<LTSTransition> GetOutTransitions(RegularFormula formula) {
 			var matchingActions = LTS.Actions.Where(formula.Matches);
 			var ret = new List<LTSTransition>();
 			foreach (var action in matchingActions) {
 				List<LTSTransition> list;
-				if (!_outTransitions.TryGetValue(action, out list))
-					list = _outTransitions[action] = new List<LTSTransition>();
-				ret.AddRange(list);
+				if (_outTransitions.TryGetValue(action, out list))
+					ret.AddRange(list);
 			}
 			return ret;
 		}
 
 		public List<LTSTransition> Transitions {
 			get {
-				return LTS.Transitions.Where(tr => tr.Left == this || tr.Right == this).ToList();
+				// return LTS.Transitions.Where(tr => tr.Left == this || tr.Right == this).ToList();
+				throw new NotImplementedException();
 			}
 		}
 

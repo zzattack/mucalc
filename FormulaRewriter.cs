@@ -30,7 +30,7 @@ namespace ModelChecker {
 					dia.RegularFormula.Multiplier = "";
 					return Rewrite(new Mu(var, new Disjunction(new Diamond(dia.RegularFormula, var), dia.Formula)));
 				}
-
+				dia.Formula = Rewrite(dia.Formula);
 			}
 
 			else if (form is Box) {
@@ -56,6 +56,7 @@ namespace ModelChecker {
 			else if (form is Conjunction) form = new Conjunction(Rewrite(((Conjunction)form).Left), Rewrite(((Conjunction)form).Right));
 			else if (form is Mu) form = new Mu(((Mu)form).Variable, Rewrite(((Mu)form).Formula));
 			else if (form is Nu) form = new Nu(((Nu)form).Variable, Rewrite(((Nu)form).Formula));
+			else if (form is Negation) form = new Negation(Rewrite(((Negation)form).Formula));
 
 			return form;
 		}
@@ -69,10 +70,11 @@ namespace ModelChecker {
 				var box = form as Box;
 
 				// [rf1+rf2]f = [rf1]f || [rf2]f
-				/*if (box.RegularFormula is PlusFormula) {
-					var un = box.RegularFormula as PlusFormula;
+				/*if (box.RegularFormula is UnionFormula) {
+					var un = box.RegularFormula as UnionFormula;
 					return Rewrite(new Disjunction(new Box(un.Left, box.Formula), new Box(un.Right, box.Formula)));
-				}*/ // directly supported by RegularFormula now!
+				}*/
+				// directly supported by RegularFormula now!
 
 				// [a.rf]f = [a][rf]f
 				if (box.RegularFormula is SequenceFormula) {
@@ -94,10 +96,11 @@ namespace ModelChecker {
 			else if (form is Diamond) {
 				var dia = form as Diamond;
 				// <rf1+rf2>f = <[rf1>f || <rf2>f 
-				/*if (dia.RegularFormula is PlusFormula) {
-					var un = dia.RegularFormula as PlusFormula;
+				/*if (dia.RegularFormula is UnionFormula) {
+					var un = dia.RegularFormula as UnionFormula;
 					return Rewrite(new Disjunction(new Diamond(un.Left, dia.Formula), new Diamond(un.Right, dia.Formula)));
-				}*/ // directly supported now!
+				}*/
+				// directly supported now!
 
 				// <a.rf>f = <a><rf>f
 				if (dia.RegularFormula is SequenceFormula) {
