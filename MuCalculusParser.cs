@@ -19,21 +19,22 @@ namespace ModelChecker {
 			@Regformseq_Dot = 7,                       // <regFormSeq> ::= <regFormSeq> '.' <regForm>
 			@Regformseq = 8,                           // <regFormSeq> ::= <regFormValue>
 			@Regformvalue_Identifier = 9,              // <regFormValue> ::= Identifier <Multiplier>
-			@Regformvalue_Lparen_Rparen = 10,          // <regFormValue> ::= '(' <regForm> ')' <Multiplier>
-			@Muform_Identifier = 11,                   // <muForm> ::= Identifier
-			@Muform_Variable = 12,                     // <muForm> ::= Variable
-			@Muform_Lparen_Pipepipe_Rparen = 13,       // <muForm> ::= '(' <muForm> '||' <muForm> ')'
-			@Muform_Lparen_Ampamp_Rparen = 14,         // <muForm> ::= '(' <muForm> '&&' <muForm> ')'
-			@Muform_Lt_Gt = 15,                        // <muForm> ::= '<' <regForm> '>' <muForm>
-			@Muform_Lbracket_Rbracket = 16,            // <muForm> ::= '[' <regForm> ']' <muForm>
-			@Muform_Mu_Variable_Dot = 17,              // <muForm> ::= mu Variable '.' <muForm>
-			@Muform_Nu_Variable_Dot = 18,              // <muForm> ::= nu Variable '.' <muForm>
-			@Muform_Not = 19,                          // <muForm> ::= not <muForm>
-			@Line_Commentl = 20,                       // <Line> ::= CommentL <nl>
-			@Line = 21,                                // <Line> ::= <muForm> <nl>
-			@Line2 = 22,                               // <Line> ::= <nl>
-			@Lines = 23,                               // <Lines> ::= <Line> <Lines>
-			@Lines2 = 24                               // <Lines> ::= 
+			@Regformvalue_Not = 10,                    // <regFormValue> ::= not <regForm>
+			@Regformvalue_Lparen_Rparen = 11,          // <regFormValue> ::= '(' <regForm> ')' <Multiplier>
+			@Muform_Identifier = 12,                   // <muForm> ::= Identifier
+			@Muform_Variable = 13,                     // <muForm> ::= Variable
+			@Muform_Lparen_Pipepipe_Rparen = 14,       // <muForm> ::= '(' <muForm> '||' <muForm> ')'
+			@Muform_Lparen_Ampamp_Rparen = 15,         // <muForm> ::= '(' <muForm> '&&' <muForm> ')'
+			@Muform_Lt_Gt = 16,                        // <muForm> ::= '<' <regForm> '>' <muForm>
+			@Muform_Lbracket_Rbracket = 17,            // <muForm> ::= '[' <regForm> ']' <muForm>
+			@Muform_Mu_Variable_Dot = 18,              // <muForm> ::= mu Variable '.' <muForm>
+			@Muform_Nu_Variable_Dot = 19,              // <muForm> ::= nu Variable '.' <muForm>
+			@Muform_Not = 20,                          // <muForm> ::= not <muForm>
+			@Line_Commentl = 21,                       // <Line> ::= CommentL <nl>
+			@Line = 22,                                // <Line> ::= <muForm> <nl>
+			@Line2 = 23,                               // <Line> ::= <nl>
+			@Lines = 24,                               // <Lines> ::= <Line> <Lines>
+			@Lines2 = 25                               // <Lines> ::= 
 		}
 
 		public void Setup() {
@@ -146,6 +147,11 @@ namespace ModelChecker {
 				case ProductionIndex.Regformvalue_Identifier:
 					// <regFormValue> ::= Identifier <Multiplier>
 					result = new SingleAction((string)r[0].Data, (string)r[1].Data);
+					break;
+
+				case ProductionIndex.Regformvalue_Not:
+					// <regFormValue> ::= not <regForm>
+					result = new NegateAction((RegularFormula)r[1].Data);
 					break;
 
 				case ProductionIndex.Regformvalue_Lparen_Rparen:

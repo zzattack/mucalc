@@ -9,7 +9,7 @@ namespace ModelChecker {
 
 			if (formula is Proposition) {
 				var prop = formula as Proposition;
-				return bool.Parse(prop.Value) ? new HashSet<LTSState>(lts.States) : new HashSet<LTSState>();
+				return bool.Parse(prop.Value) ? lts.States : new HashSet<LTSState>();
 			}
 
 			else if (formula is Variable) {
@@ -46,8 +46,8 @@ namespace ModelChecker {
 
 				return new HashSet<LTSState>(lts.States.Where(
 					// states where, for all outtransitions with action a, the Formula holds in the direct successor 
-					state => state.OutTransitions.All(tr => tr.Action != box.Action || fe.Contains(tr.Right))
-					));
+					state => state.GetOutTransitions(box.RegularFormula).All(tr => fe.Contains(tr.Right))
+				));
 			}
 
 			else if (formula is Diamond) {
@@ -74,7 +74,7 @@ namespace ModelChecker {
 
 			else if (formula is Nu) {
 				var nu = formula as Nu;
-				env[nu.Variable] = new HashSet<LTSState>(lts.States);
+				env[nu.Variable] = lts.States;
 
 				return FixedPoint.GFP(delegate(Tuple<HashSet<LTSState>, LTS, Environment> tuple) {
 					// repeats tau: X := solve(f)

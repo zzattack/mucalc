@@ -11,7 +11,7 @@ namespace ModelChecker {
 				if (v.Binder is Mu)
 					env[v] = new HashSet<LTSState>();
 				else if (v.Binder is Nu)
-					env[v] = new HashSet<LTSState>(lts.States);
+					env[v] = lts.States;
 			}
 		}
 
@@ -28,7 +28,7 @@ namespace ModelChecker {
 
 			if (formula is Proposition) {
 				var prop = formula as Proposition;
-				return bool.Parse(prop.Value) ? new HashSet<LTSState>(lts.States) : new HashSet<LTSState>();
+				return bool.Parse(prop.Value) ? lts.States : new HashSet<LTSState>();
 			}
 
 			else if (formula is Variable) {
@@ -62,12 +62,11 @@ namespace ModelChecker {
 				// box a f = { s | forall t. s -a-> t ==> t in [[f]]e }
 				// i.e. the set of states for which all a-transitions go to a state in which f holds
 				var fe = Solve(box.Formula, lts, env, false);
-
+				
 				return new HashSet<LTSState>(lts.States.Where(
 					// states where, for all outtransitions with action a, the Formula holds in the direct successor 
-					state =>
-					state.OutTransitions.All(tr => tr.Action != box.Action || fe.Contains(tr.Right))
-					));
+					state => state.GetOutTransitions(box.RegularFormula).All(tr => fe.Contains(tr.Right))
+				));
 			}
 
 			else if (formula is Diamond) {
@@ -112,7 +111,7 @@ namespace ModelChecker {
 					// surrounding binder is mu
 					// reset open subformulae of form nu Xk.g set env[k]=true
 					foreach (var innerNu in formula.AllSubFormulas.OfType<Nu>().Where(m => m.FreeVariables.Count > 0))
-						env[innerNu.Variable] = new HashSet<LTSState>(lts.States);
+						env[innerNu.Variable] = lts.States;
 				}
 
 				HashSet<LTSState> Xold;

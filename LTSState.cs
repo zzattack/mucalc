@@ -5,8 +5,10 @@ namespace ModelChecker {
 	class LTSState {
 		public readonly string Name;
 		public LTS LTS;
-		private List<LTSTransition> _outTransitions;
-		private List<LTSTransition> _inTransitions;
+		private readonly Dictionary<string, List<LTSTransition>> _outTransitions = new Dictionary<string, List<LTSTransition>>();
+		private readonly Dictionary<string, List<LTSTransition>> _inTransitions = new Dictionary<string, List<LTSTransition>>();
+		
+		public bool Tag { get; set; }
 
 		public LTSState(string name, LTS lts) {
 			Name = name;
@@ -17,18 +19,28 @@ namespace ModelChecker {
 			return Name;
 		}
 
-		public List<LTSTransition> InTransitions {
-			get {
-				if (_inTransitions == null) _inTransitions = LTS.Transitions.Where(tr => tr.Right == this).ToList();
-				return _inTransitions;
+		public List<LTSTransition> GetInTransitions(RegularFormula formula) {
+			var matchingActions = LTS.Actions.Where(formula.Matches);
+			var ret = new List<LTSTransition>();
+			foreach (var action in matchingActions) {
+				List<LTSTransition> list;
+				if (!_inTransitions.TryGetValue(action, out list))
+					list = _inTransitions[action] = new List<LTSTransition>();
+				ret.AddRange(list);
 			}
+			return ret;
 		}
 
-		public List<LTSTransition> OutTransitions {
-			get {
-				if (_outTransitions == null) _outTransitions = LTS.Transitions.Where(tr => tr.Left == this).ToList();
-				return _outTransitions;
+		public List<LTSTransition> GetOutTransitions(RegularFormula formula) {
+			var matchingActions = LTS.Actions.Where(formula.Matches);
+			var ret = new List<LTSTransition>();
+			foreach (var action in matchingActions) {
+				List<LTSTransition> list;
+				if (!_outTransitions.TryGetValue(action, out list))
+					list = _outTransitions[action] = new List<LTSTransition>();
+				ret.AddRange(list);
 			}
+			return ret;
 		}
 
 		public List<LTSTransition> Transitions {
@@ -43,6 +55,22 @@ namespace ModelChecker {
 
 		public override int GetHashCode() {
 			return Name.GetHashCode();
+		}
+
+		internal void AddInTransition(LTSTransition trans) {
+			List<LTSTransition> list;
+			if (!_inTransitions.TryGetValue(trans.Action, out list)) {
+				list = _inTransitions[trans.Action] = new List<LTSTransition>();
+			}
+			list.Add(trans);
+		}
+
+		internal void AddOutTransition(LTSTransition trans) {
+			List<LTSTransition> list;
+			if (!_outTransitions.TryGetValue(trans.Action, out list)) {
+				list = _outTransitions[trans.Action] = new List<LTSTransition>();
+			}
+			list.Add(trans);
 		}
 
 	}

@@ -69,13 +69,13 @@ namespace ModelChecker {
 				var box = form as Box;
 
 				// [rf1+rf2]f = [rf1]f || [rf2]f
-				if (box.RegularFormula is PlusFormula) {
+				/*if (box.RegularFormula is PlusFormula) {
 					var un = box.RegularFormula as PlusFormula;
 					return Rewrite(new Disjunction(new Box(un.Left, box.Formula), new Box(un.Right, box.Formula)));
-				}
+				}*/ // directly supported by RegularFormula now!
 
 				// [a.rf]f = [a][rf]f
-				else if (box.RegularFormula is SequenceFormula) {
+				if (box.RegularFormula is SequenceFormula) {
 					var seq = box.RegularFormula as SequenceFormula;
 					return Rewrite(new Box(seq.First, new Box(seq.Sequence, RewriteRFs(box.Formula))));
 				}
@@ -94,13 +94,13 @@ namespace ModelChecker {
 			else if (form is Diamond) {
 				var dia = form as Diamond;
 				// <rf1+rf2>f = <[rf1>f || <rf2>f 
-				if (dia.RegularFormula is PlusFormula) {
+				/*if (dia.RegularFormula is PlusFormula) {
 					var un = dia.RegularFormula as PlusFormula;
 					return Rewrite(new Disjunction(new Diamond(un.Left, dia.Formula), new Diamond(un.Right, dia.Formula)));
-				}
+				}*/ // directly supported now!
 
 				// <a.rf>f = <a><rf>f
-				else if (dia.RegularFormula is SequenceFormula) {
+				if (dia.RegularFormula is SequenceFormula) {
 					var seq = dia.RegularFormula as SequenceFormula;
 					dia.RegularFormula = seq.First;
 					dia.Formula = new Diamond(seq.Sequence, dia.Formula);

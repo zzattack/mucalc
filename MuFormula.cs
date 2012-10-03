@@ -205,9 +205,6 @@ namespace ModelChecker {
 
 	class Box : MuFormula {
 		public RegularFormula RegularFormula;
-		public string Action {
-			get { return ((SingleAction)RegularFormula).Action; }
-		}
 		public MuFormula Formula;
 
 		public Box(RegularFormula regForm, MuFormula formula) {
@@ -237,11 +234,7 @@ namespace ModelChecker {
 
 	internal class Diamond : MuFormula {
 		public RegularFormula RegularFormula;
-		public string Action {
-			get { return ((SingleAction)RegularFormula).Action; }
-		}
-
-		public MuFormula Formula;
+ 		public MuFormula Formula;
 
 		public Diamond(RegularFormula regForm, MuFormula formula) {
 			RegularFormula = regForm;
