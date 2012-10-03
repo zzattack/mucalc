@@ -41,7 +41,11 @@ namespace ModelChecker {
             }
 
 			ret.InitialState = ret.States.FirstOrDefault(s => s.Name == initial);
-            return ret;
+			foreach (var s in ret.States) {
+				// optimization thingie
+				var dummy = s.OutTransitions;
+			}
+        	return ret;
         }
 
         private static LTSState GetState(string stateName, LTS lts) {

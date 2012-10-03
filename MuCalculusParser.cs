@@ -36,7 +36,6 @@ namespace ModelChecker {
 			@Lines2 = 24                               // <Lines> ::= 
 		}
 
-		public object program;
 		public void Setup() {
 			// This procedure can be called to load the parse tables. The class can
 			// read tables using a BinaryReader.

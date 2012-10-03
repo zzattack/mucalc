@@ -21,6 +21,8 @@ namespace ModelChecker {
 				var allVariables = new List<Variable>();
 				if (formula is Variable) allVariables.Add((Variable)formula);
 				allVariables.AddRange(formula.AllSubFormulas.OfType<Variable>());
+				allVariables.AddRange(formula.AllSubFormulas.OfType<Mu>().Select(mu => mu.Variable));
+				allVariables.AddRange(formula.AllSubFormulas.OfType<Nu>().Select(nu => nu.Variable));
 				Init(allVariables.Distinct(), lts, env);
 			}
 
@@ -89,7 +91,7 @@ namespace ModelChecker {
 
 				HashSet<LTSState> Xold;
 				do {
-					Xold = env[mu.Variable];
+					Xold = env.GetVariable(mu.Variable);
 					env[mu.Variable] = Solve(mu.Formula, lts, env, false);
 				} while (Xold.Count != env[mu.Variable].Count);
 				return env[mu.Variable];

@@ -291,7 +291,14 @@ namespace ModelChecker {
 		}
 
 		public override int DependentAlternationDepth {
-			get { return 1 + AllSubFormulas.OfType<Nu>().Select(v => v.DependentAlternationDepth).Concat(new[] { 0 }).Max(); }
+			get {
+				int max = 0;
+				foreach (var v in AllSubFormulas) {
+					if (v is Nu && v.AllSubFormulas.Contains(Variable))
+						max = Math.Max(max, v.DependentAlternationDepth);
+				}
+				return max + 1;
+			}
 		}
 
 		public override List<MuFormula> SubFormulas {
@@ -317,11 +324,25 @@ namespace ModelChecker {
 		}
 
 		public override int AlternationDepth {
-			get { return 1 + AllSubFormulas.OfType<Mu>().Select(v => v.AlternationDepth).Concat(new[] { 0 }).Max(); }
+			get {
+				int max = 0;
+				foreach (var v in AllSubFormulas) {
+					if (v is Mu)
+						max = Math.Max(max, v.AlternationDepth);
+				}
+				return max + 1;
+			}
 		}
 
 		public override int DependentAlternationDepth {
-			get { return 1 + AllSubFormulas.OfType<Mu>().Select(v => v.DependentAlternationDepth).Concat(new[] { 0 }).Max(); }
+			get {
+				int max = 0;
+				foreach (var v in AllSubFormulas) {
+					if (v is Mu && v.AllSubFormulas.Contains(Variable))
+						max = Math.Max(max, v.DependentAlternationDepth);
+				}
+				return max + 1;
+			}
 		}
 
 		public override List<MuFormula> SubFormulas {

@@ -7,8 +7,7 @@ NewLine       = {CR}{LF} | {CR} | {LF}
 CommentL        = '%' {Printable}*
 
 <nl>     ::= NewLine <nl>          !One or more
-          |  NewLine
-          
+          |  NewLine          
 
 Variable    = [ABCDEFGHIJKLMNOPQRSTUVWXYZ]
 Identifier  = [abcdefghijklmnopqrstuvwxyz]+            
@@ -38,4 +37,4 @@ Identifier  = [abcdefghijklmnopqrstuvwxyz]+
          | <nl> 
          
 <Lines> ::= <Line><Lines>
-           |     
+         |
