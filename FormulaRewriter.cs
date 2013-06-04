@@ -5,7 +5,7 @@ using System.Globalization;
 namespace ModelChecker {
 	class FormulaRewriter {
 
-		internal static MuFormula Rewrite(MuFormula form) {
+		public static MuFormula Rewrite(MuFormula form) {
 			form = RewriteBoxDia(form);
 			form = RewriteRFs(form);
 			return form;

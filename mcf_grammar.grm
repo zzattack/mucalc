@@ -10,7 +10,7 @@ CommentL        = '%' {Printable}*
           |  NewLine          
 
 Variable    = [ABCDEFGHIJKLMNOPQRSTUVWXYZ]
-Identifier  = [abcdefghijklmnopqrstuvwxyz] [(,)0123456789abcdefghijklmnopqrstuvwxyz]]+    
+Identifier  = [0123456789abcdefghijklmnopqrstuvwxyz]+ 
 
 <Multiplier> ::= '+' | '*' | 
               
@@ -32,11 +32,12 @@ Identifier  = [abcdefghijklmnopqrstuvwxyz] [(,)0123456789abcdefghijklmnopqrstuvw
        | 'mu' Variable '.' <muForm>
        | 'nu' Variable '.' <muForm> 
        | 'not' <muForm>
+       | '(' < muForm> ')'
               
 <Line> ::= CommentL <nl>
          | <muForm> <nl>
          | <nl> 
-         
+          
 <Lines> ::= <Line><Lines>
          |
          

@@ -15,10 +15,13 @@ namespace ModelChecker {
 		/// </summary>
 		[STAThread]
 		static void Main(string[] args) {
+			var p = new MuCalculusParser();
+			p.Setup();
+			bool b = p.Parse(new StringReader("nu X.((mu Y . [b]Y) && nu Z.((<b> X) && (<a>(Z && <a> X))))\r\n"));
+
 			string ltsPath = args[0];
 			string formulasPath = args[1];
-
-			Log("LTS: {0}", ltsPath);
+			Log("LTS: {0}", ltsPath); 
 			var parser = new MuCalculusParser();
 			parser.Setup();
 			var fileStream = new FileStream(formulasPath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
@@ -41,7 +44,7 @@ namespace ModelChecker {
 			Console.ReadKey();
 		}
 
-		private static LTS ChessBoard(int boardSize) {
+		static LTS ChessBoard(int boardSize) {
 			// this procedure outputs a board of size boardSize x boardSize in aldebaran format
 			var lts = new LTS();
 			var board = new LTSState[boardSize, boardSize];

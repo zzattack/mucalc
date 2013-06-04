@@ -14,7 +14,7 @@ namespace ModelChecker {
 			@Multiplier_Plus = 2,                      // <Multiplier> ::= '+'
 			@Multiplier_Times = 3,                     // <Multiplier> ::= '*'
 			@Multiplier = 4,                           // <Multiplier> ::= 
-			Regform_Pipepipe = 5,                         // <regForm> ::= <regForm> '+' <regFormSeq>
+			@Regform_Pipepipe = 5,                     // <regForm> ::= <regForm> '||' <regFormSeq>
 			@Regform = 6,                              // <regForm> ::= <regFormSeq>
 			@Regformseq_Dot = 7,                       // <regFormSeq> ::= <regFormSeq> '.' <regForm>
 			@Regformseq = 8,                           // <regFormSeq> ::= <regFormValue>
@@ -30,17 +30,18 @@ namespace ModelChecker {
 			@Muform_Mu_Variable_Dot = 18,              // <muForm> ::= mu Variable '.' <muForm>
 			@Muform_Nu_Variable_Dot = 19,              // <muForm> ::= nu Variable '.' <muForm>
 			@Muform_Not = 20,                          // <muForm> ::= not <muForm>
-			@Line_Commentl = 21,                       // <Line> ::= CommentL <nl>
-			@Line = 22,                                // <Line> ::= <muForm> <nl>
-			@Line2 = 23,                               // <Line> ::= <nl>
-			@Lines = 24,                               // <Lines> ::= <Line> <Lines>
-			@Lines2 = 25                               // <Lines> ::= 
+			@Muform_Lparen_Rparen = 21,                // <muForm> ::= '(' <muForm> ')'
+			@Line_Commentl = 22,                       // <Line> ::= CommentL <nl>
+			@Line = 23,                                // <Line> ::= <muForm> <nl>
+			@Line2 = 24,                               // <Line> ::= <nl>
+			@Lines = 25,                               // <Lines> ::= <Line> <Lines>
+			@Lines2 = 26                               // <Lines> ::= 
 		}
 
 		public void Setup() {
 			// This procedure can be called to load the parse tables. The class can
 			// read tables using a BinaryReader.
-			parser.LoadTables("mcf_grammar.egt");
+			parser.LoadTables(@"C:\Users\Frank\Dropbox\TUe\2IW55 - Algorithms for Model Checking\assignment 1\ModelChecker\mcf_grammar.egt");
 		}
 
 		public bool Parse(TextReader reader) {
@@ -221,10 +222,15 @@ namespace ModelChecker {
 					// <muForm> ::= not <muForm>
 					result = new Negation((MuFormula)r[1].Data);
 					break;
-					
+
+				case ProductionIndex.Muform_Lparen_Rparen:
+					result = r[1].Data as MuFormula;
+					break;
+
 				case ProductionIndex.Line_Commentl:
 					// <Line> ::= CommentL <nl>
 					break;
+
 
 				case ProductionIndex.Line:
 					// <Line> ::= <muForm> <nl>

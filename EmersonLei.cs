@@ -80,7 +80,7 @@ namespace ModelChecker {
 					);
 				return Solve(shorthand, lts, env, false);
 			}
-
+			 
 			else if (formula is Mu) {
 				var mu = formula as Mu;
 				if (mu.Parent is Nu) {
@@ -97,15 +97,6 @@ namespace ModelChecker {
 					env[mu.Variable] = Solve(mu.Formula, lts, env, false);
 				} while (Xold.Count != env[mu.Variable].Count);
 				return env[mu.Variable];
-
-				/*
-				return FixedPoint.LFP(delegate(Tuple<HashSet<LTSState>, LTS, Environment> tuple) {
-					// repeats tau: X := solve(f)
-					var X = tuple.Item1;
-					X = Solve(mu.Formula, lts, env);
-					env[mu.Variable] = X;
-					return Tuple.Create(X, lts, env);
-				}, lts, env);*/
 			}
 
 			else if (formula is Nu) {
@@ -123,18 +114,8 @@ namespace ModelChecker {
 					env[nu.Variable] = Solve(nu.Formula, lts, env, false);
 				} while (Xold.Count != env[nu.Variable].Count);
 				return env[nu.Variable];
-
-				/*
-				return FixedPoint.GFP(delegate(Tuple<HashSet<LTSState>, LTS, Environment> tuple) {
-					// repeats tau: X := solve(f)
-					var X = tuple.Item1;
-					X = Solve(nu.Formula, lts, env);
-					env[nu.Variable] = X;
-
-					return Tuple.Create(X, lts, env);
-				}, lts, env);
-				*/
 			}
+			
 
 			throw new InvalidDataException("formula not valid in our grammar");
 		}

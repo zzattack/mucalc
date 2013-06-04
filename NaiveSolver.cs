@@ -86,10 +86,8 @@ namespace ModelChecker {
 				}, lts, env);
 
 			}
-
-
+			
 			throw new InvalidDataException("not a valid formula in our grammar");
-
 		}
 
 
